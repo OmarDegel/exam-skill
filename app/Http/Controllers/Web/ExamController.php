@@ -21,7 +21,7 @@ class ExamController extends Controller
                 if($checking !== null and $checking->pivot->status == "closed"){
                     $canEnter=false;
                 }}
-        return view("web.exams.show",compact("exam","canEnter"));
+        return view("web.exam.show",compact("exam","canEnter"));
     }
     public function start($examid , Request $request){
         // if( session("prev") !=="start/$examid" ){
@@ -45,7 +45,7 @@ class ExamController extends Controller
         $exam=Exam::where("id",$id)->first();
         $questiones=Question::where("exam_id",$id)->get();
         $request->session()->flash("prev","/question/show/$id");
-        return view("web.exams.exam-questions",compact("exam","questiones"));
+        return view("web.exam.exam-questions",compact("exam","questiones"));
     }
     public function submit($examid , Request $request){
 

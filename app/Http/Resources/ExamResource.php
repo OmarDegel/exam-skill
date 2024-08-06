@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use App\Http\Resources\QueResource;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ExamResource extends JsonResource
@@ -17,10 +18,8 @@ class ExamResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "name_en"=>$this->name("en"),
-            "name_ar"=>$this->name("ar"),
-            "description_ar"=>$this->desc("ar"),
-            "description_en"=>$this->desc("en"),
+            "name"=>$this->name(App::getLocale()),
+            "description"=>$this->desc(App::getLocale()),
             "img"=>asset("uploads/$this->img"),
             "question_no"=>$this->question_no,
             "difficulty"=>$this->difficulty,

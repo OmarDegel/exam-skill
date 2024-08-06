@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\SkillResource;
+use App\Http\traits\Api;
 use App\Models\Skill;
-use Illuminate\Http\Request;
 
 class SkillController extends Controller
 {
+    use Api;
     public function index(){
         $skills=Skill::get();
-        return SkillResource::collection($skills);
+        return $this->Data(compact("skills"));
     }
 
     Public function show($id){
         $skill=Skill::where("id",$id)->with("exams")->first();
-        return new SkillResource($skill);
-    }
+        return $this->Data(compact("skill"));
+        }
 }

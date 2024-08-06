@@ -46,6 +46,10 @@ return[
     'submit'=>'Submit',
     'profile'=>'Profile',
     'dashboard'=>'Dashboard',
+    "duration"=>"Duration(mins)",
+    "difficulty"=>"Difficulty",
+    "skill"=>"Skill",
+    "question"=>"Ques",
  
 
 

@@ -42,8 +42,7 @@ Route::post("/exams/submit/{id}",[ExamController::class,"submit"])->name("exam.s
 
 
 
-
-Route::prefix("dashboard")->middleware(["Dash","auth"])->group(function(){
+Route::prefix("dashboard")->middleware(["Dash","auth","Lang"])->group(function(){
     Route::get('/', [DashController::class , "index"])->name("dashHome");
 
     Route::resource('/cat', AdminCatController::class);

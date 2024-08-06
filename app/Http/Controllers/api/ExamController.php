@@ -2,17 +2,23 @@
 
 namespace App\Http\Controllers\api;
 
+use App\Http\traits\Api;
 use Carbon\Carbon;
 use App\Models\Exam;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExamResource;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 
 class ExamController extends Controller
 {
+    use Api;
+    public function index()
+    {
+        $popularExams=Exam::withCount('users')->orderBy('users_count','desc')->get();
+        return ExamResource::collection($popularExams);
+    }
     public function show(string $id)
     {
         $exam=Exam::where("id",$id)->first();
@@ -24,14 +30,18 @@ class ExamController extends Controller
         return new ExamResource($exam);
     }
     public function start($examid,Request $request){
-        $user=Auth::user();
+        $user=Auth::guard("api")->user();
         if( ! $user->exams->contains($examid)){
         $user->exams()->attach($examid);
     }else{
         $user->exams()->updateExistingPivot($examid,[
             "status"=>"closed"
         ]);
+        
     }
+    $exam=Exam::with('questions')->find($examid);
+    return new ExamResource($exam);
+
         
     }
 
@@ -66,7 +76,7 @@ class ExamController extends Controller
         }
         $mark=($score/$examNum)*100;
 
-        $user=$request->user();
+        $user=Auth::guard("api")->user();
 
         $pivotRaw=$user->exams()->where("exam_id",$examid)->first();
 
@@ -78,19 +88,14 @@ class ExamController extends Controller
         
         
         $timeMins=$submitTime->diffInMinutes($startTime);
-        // if($timeMins> $exam->duration_mins){
-        //     $mark=0
-        // }
+        
         $user->exams()->where("exam_id",$examid)->updateExistingPivot($examid,[
             "score"=>$mark,
             'time_mins'=>$timeMins
 
         ]);
-        return response()->json([
-            "msg"=>"u submit exams successfully , your score is $mark"
-        ]);
+        return $this->SuccessMsg("u get $mark");
 
-        // $request->session()->flash("success","your score is {$mark}");
-        // return redirect(url("/exams/show/$examid"));
+        
     }
 }

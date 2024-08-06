@@ -54,8 +54,11 @@ class Kernel extends HttpKernel
      */
     protected $middlewareAliases = [
         'auth' => \App\Http\Middleware\Authenticate::class,
+        'authApi' => \App\Http\Middleware\ApiAuthMiddleware::class,
         'api' => \App\Http\Middleware\ApiMiddleware::class,
         'superadmin' => \App\Http\Middleware\IsSuperAdmin::class,
+        'ApiCanEnter' => \App\Http\Middleware\ApiCanEnter::class,
+        'ApiCanSubmit' => \App\Http\Middleware\ApiSubmitExamMiddleware::class,
         'admin' => \App\Http\Middleware\IsAdmin::class,
         'CanEnter' => \App\Http\Middleware\CanEnter::class,
         'Dash' => \App\Http\Middleware\DashBoard::class,
@@ -70,5 +73,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'Lang' => \App\Http\Middleware\Lang::class,
+        'LangApi' => \App\Http\Middleware\LangApiMiddleware::class,
     ];
 }

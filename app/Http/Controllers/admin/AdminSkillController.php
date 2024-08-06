@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\Controller;
+use Exception;
 use App\Models\Cat;
 use App\Models\Skill;
-use Exception;
+use App\Http\traits\Media;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\SkillRequest;
+use App\Http\Controllers\MainController;
 
-class AdminSkillController extends Controller
+class AdminSkillController extends MainController
 {
     /**
      * Display a listing of the resource.
@@ -32,15 +33,8 @@ class AdminSkillController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(SkillRequest $request)
     {
-        $request->validate([
-            "name_en"=>"required|string|max:250",
-            "name_ar"=>"required|string|max:50",
-            'img'=>"required|image|max:2048",
-            'cat_id'=>"required|exists:cats,id"
-        ]);
-
         
         $image=$request->file('img')->store('skills','public');
 
@@ -79,39 +73,13 @@ class AdminSkillController extends Controller
     return view('admin.skill.index', compact('skills', 'cats' ,"skill"));    
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    
+    public function update(SkillRequest $request, string $id)
     {
-        //
-    }
-
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $request->validate([
-            "id"=>"required|exists:skills,id",
-            "name_en"=>"required|string|max:250",
-            "name_ar"=>"required|string|max:50",
-            'img'=>"nullable|image|max:2048",
-            'cat_id'=>"required|exists:cats,id"
-        ]);
 
         $skill=Skill::where("id",$request->id)->first();
-        $oldImage = $skill->img;
-
-    if ($request->hasFile('img')) {
-        if ($oldImage) {
-            Storage::disk('public')->delete($oldImage);
-        }
-            $newImagePath = $request->file('img')->store('skills', 'public');
-    } else {
-        $newImagePath = $oldImage;
-    }
+        
+        $newImagePath=$this->editPhoto($skill->img,$request);
         Skill::where("id",$id)->update([
             "name"=>json_encode([
                 "en" => $request -> name_en,
@@ -132,10 +100,9 @@ class AdminSkillController extends Controller
     {
         try{
             $skill=Skill::where("id",$id)->first();
-            $oldImage = $skill->img;
             $skill->delete();
-            Storage::disk('public')->delete($oldImage);
-                $msg="done deleted";
+            $this->deletePhoto($skill);
+
         }catch(Exception $e){
         $msg="cant deleted";
     }
@@ -144,12 +111,8 @@ class AdminSkillController extends Controller
                 return back();
     }
     public function toggle($id){
-        $skill=Skill::where("id",$id)->first();
-        
-        Skill::where("id",$id)->update([
-            "active" => ! $skill->active,
-        ]);
-        return redirect()->back();
+        $model=Skill::where("id",$id);
+        return $this->ToggleMain($model);
     }
 
     public function searchh(Request $request){

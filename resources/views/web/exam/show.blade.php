@@ -70,10 +70,10 @@
 
 						<!-- exam details widget -->
                         <ul class="list-group">
-                            <li class="list-group-item">Skill:{{ $exam->skill->name() }}</li>
-                            <li class="list-group-item">Questions:{{ $exam->question_no }}</li>
-                            <li class="list-group-item">{{ $exam->duration_mins }}</li>
-                            <li class="list-group-item">Difficulty: 
+                            <li class="list-group-item">{{__("web.skill")}}:{{ $exam->skill->name() }}</li>
+                            <li class="list-group-item">@lang("web.question"):{{ $exam->question_no }}</li>
+                            <li class="list-group-item">@lang("web.duration") = {{ $exam->duration_mins }}</li>
+                            <li class="list-group-item">{{__("web.difficulty")}}: 
 								@for($i = 1; $i <= 5; $i++)
 									@if ($i <=$exam->difficulty)
 										<i class="fa fa-star"></i>

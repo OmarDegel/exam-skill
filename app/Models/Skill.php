@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 
-class Skill extends Model
+class Skill  extends MainModel
 {
-    use HasFactory;
-    protected $guarded =["id","created_at","updated_at"];
+    // use HasFactory;
+    // protected $guarded =["id","created_at","updated_at"];
+    protected $fillable=["name","img","cat_id","active"];
 
     public function cat(){
         return $this->belongsTo(Cat::class);
@@ -19,9 +20,11 @@ class Skill extends Model
     }
 
     public function name($lang=null){
-        $lang=$lang?? App::getLocale();
+        // $lang=$lang?? App::getLocale();
     
-        return json_decode($this->name)->$lang;
+        // return json_decode($this->name)->$lang;
+        return $this->getTranslatedAttribute('name', $lang);
+
     }
     public function studentCount(){
         $stuNum=0;

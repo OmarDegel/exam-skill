@@ -1,6 +1,5 @@
 <?PHP
 return[
-    //navbar
     'home'=>'الرئيسية',
     'categories' =>'التصنيفات',
     'contact'=>'إتصل بنا',
@@ -44,4 +43,12 @@ return[
     'submit'=>'ارسال',
     'profile'=>'الحساب',
     'dashboard'=>'لوحه التحكم',
+    "duration"=>"الوقت(دقائق)",
+    "difficulty"=>"الصعوبه",
+    "skill"=>"المهاره",
+    "question"=>"الاسئله",
+
+
+
+
 ];

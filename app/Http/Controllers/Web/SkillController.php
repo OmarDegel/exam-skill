@@ -12,6 +12,6 @@ class SkillController extends Controller
     public function show($id){
         $skill=Skill::where("id",$id)->first();
         $exams=Exam::active()->where("skill_id",$id)->paginate(6);
-        return view("web.skills.show",compact("skill","exams"));
+        return view("web.skill.show",compact("skill","exams"));
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\ExamResource;
+use Illuminate\Support\Facades\App;
 
 class SkillResource extends JsonResource
 {
@@ -17,8 +18,7 @@ class SkillResource extends JsonResource
     {
         return [
             "id"=>$this->id,
-            "name_en"=>$this->id,
-            "name_ar"=>$this->id,
+            "name"=>$this->name(App::getLocale()),
             "img"=>asset("uploads/$this->img"),
             "exams"=>ExamResource::collection($this->whenLoaded("exams"))
         ];

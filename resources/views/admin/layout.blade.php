@@ -111,6 +111,27 @@ scratch. This page gets rid of all links and provides the needed markup only.
               </p>
             </a>
           </li>
+          @if (App::getlocale() == "en")
+          <li class="nav-item">
+            <a href="{{route("lang.set",["lang"=> "ar"])}}" class="nav-link">
+              <i class="fas fa-envelope"></i>
+              
+              <p>
+          ar   
+              </p>
+            </a>
+          </li>
+            @else
+            <li class="nav-item">
+              <a href="{{route("lang.set",["lang"=> "en"])}}" class="nav-link">
+                <i class="fas fa-envelope"></i>
+                
+                <p>
+            en   
+                </p>
+              </a>
+            </li>
+          @endif
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -133,14 +154,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- /.control-sidebar -->
 
   <!-- Main Footer -->
-  <footer class="main-footer">
-    <!-- To the right -->
-    <div class="float-right d-none d-sm-inline">
-      Anything you want
-    </div>
-    <!-- Default to the left -->
-    <strong>Copyright &copy; 2014-2019 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
-  </footer>
+  
 </div>
 <!-- ./wrapper -->
 

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\App;
 
 class CatResource extends JsonResource
 {
@@ -16,8 +17,7 @@ class CatResource extends JsonResource
     {
         return [
             "id"=>$this->id,
-            "name_en"=>$this->name("en"),
-            "name_ar"=>$this->name("ar"),
+            "name"=>$this->name(App::getLocale()),
             "skills"=>SkillResource::collection($this->whenLoaded("skills")),
             
         ];

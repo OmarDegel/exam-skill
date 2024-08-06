@@ -2,85 +2,90 @@
 
 namespace App\Http\Controllers\api;
 
-use App\Models\User;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+   
     public function register(Request $request){
-       $val= Validator::make($request->all(),[
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
         ]);
-        if($val->fails()){
-            return response()->json([
-                "erorrs"=>$val->errors()
-            ],409);
-        }
-        $access_token=Str::random(64);
-        $user= User::create([
+
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'access_token' => $access_token,
         ]);
 
+        $token = Auth::guard('api')->login($user);
         return response()->json([
-            "access_token"=>$access_token
-        ],201);
-        
-    }
-    public function login(Request $request){
-        $val= Validator::make($request->all(),[
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'password' => ['required', 'string', 'min:8'],
+            'status' => 'success',
+            'message' => 'User created successfully',
+            'user' => $user,
+            'authorisation' => [
+                'token' => $token,
+                'type' => 'bearer',
+            ]
         ]);
-        if($val->fails()){
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]);
+        $credentials = $request->only('email', 'password');
+
+        $token = Auth::guard('api')->attempt($credentials);
+        if (!$token) {
             return response()->json([
-                "erorrs"=>$val->errors()
-            ],409);
+                'status' => 'error',
+                'message' => 'Unauthorized',
+            ], 401);
         }
-        $user=User::where("email",$request->email)->first();
 
-        if($user !== null){
-            $login= Hash::check($request->password, $user->password);
-            $access_token=Str::random(64);
-
-                if($login){
-                    $user->update([
-                        "access_token"=>$access_token
-                    ]);
-
-                    return response()->json([
-                        "access_token"=>$access_token
-                    ],201);
-
-                }else{
-                    return response()->json([
-                        "msg"=> "bad password"
-                    ]);
-                }
-        }else{
-            return response()->json([
-                "msg"=> "email not found"
+        $user = Auth::guard('api')->user();
+        return response()->json([
+                'status' => 'success',
+                'user' => $user,
+                'authorisation' => [
+                    'token' => $token,
+                    'type' => 'bearer',
+                ]
             ]);
-        }
-
 
     }
-    public function logout(Request $request){
-        $access_token=$request->header("access_token");
-        $user=User::where("access_token",$access_token)->first();
-        $user->update([
-            "access_token" =>null
-        ]);
+
+    public function logout()
+    {
+        Auth::guard('api')->logout();
         return response()->json([
-            "msg"=> "logged out succussfully"
-        ], 200);
+            'status' => 'success',
+            'message' => 'Successfully logged out',
+        ]);
     }
+
+
+    public function refresh()
+    {
+        return response()->json([
+            'status' => 'success',
+            'user' => Auth::guard('api')->user(),
+            'authorisation' => [
+                'token' => Auth::guard('api')->refresh(),
+                'type' => 'bearer',
+            ]
+        ]);
+    
+
+    }
+    
 }

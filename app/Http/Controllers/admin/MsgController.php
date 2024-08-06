@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Message;
-use Illuminate\Http\Request;
+use App\Http\Requests\MsgRequest;
+use App\Http\Controllers\MainController;
 
-class MsgController extends Controller
+class MsgController extends MainController
 {
     /**
      * Display a listing of the resource.
@@ -25,13 +25,10 @@ class MsgController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request , $id)
+    public function store(MsgRequest $request , $id)
     {
         $msg=Message::where("id",$id)->first();
-        $request->validate([
-            "title"=>"required|string",
-            "body"=>"required|string"
-        ]);
+        
         $receiverMail=$msg->email;
     }
 

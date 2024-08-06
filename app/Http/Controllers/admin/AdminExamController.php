@@ -4,6 +4,10 @@ namespace App\Http\Controllers\admin;
 
 use App\Events\ExamAddedEvent;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\MainController;
+use App\Http\Requests\ExamRequest;
+use App\Http\Requests\QuesRequest;
+use App\Http\traits\Media;
 use App\Models\Exam;
 use App\Models\Question;
 use App\Models\Skill;
@@ -11,11 +15,9 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class AdminExamController extends Controller
+class AdminExamController extends MainController
 {
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index()
     {
         $exams=Exam::orderByDesc("id")->paginate(15);
@@ -23,9 +25,7 @@ class AdminExamController extends Controller
         return view("admin.exam.index",compact("exams","skills"));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    
     public function create()
     {
         $skills=Skill::get();
@@ -42,28 +42,11 @@ class AdminExamController extends Controller
         return view("admin.exam.createQue",compact("exam_id","question_no"));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function storeQues(Request $request ,$id)
+    
+    public function storeQues(QuesRequest $request ,$id)
     {
         $exam=Exam::where("id",$id)->first();
         $question_no=$exam->question_no;
-        $request->validate([
-            "titles"=>"required|array",
-            "titles.*"=>"required|string",
-            "right_answers"=>"required|array",
-            "right_answers.*"=>"required|in:1,2,3,4",
-            'option_1s'=>"required|array",
-            'option_1s.*'=>"required|string|max:255",
-            'option_2s'=>"required|array",
-            'option_2s.*'=>"required|string|max:255",
-            'option_3s'=>"required|array",
-            'option_3s.*'=>"required|string|max:255",
-            'option_4s'=>"required|array",
-            'option_4s.*'=>"required|string|max:255",
-            
-        ]);
 
         for($i=0 ;$i < $question_no ; $i++ ){
             Question::create([
@@ -86,21 +69,8 @@ class AdminExamController extends Controller
 
     
     }
-    public function store(Request $request)
+    public function store(ExamRequest $request)
     {
-        $request->validate([
-            "name_en"=>"required|string|max:250",
-            "name_ar"=>"required|string|max:50",
-            'img'=>"required|image|max:2048",
-            'desc_en'=>"required|string|max:5000",
-            'desc_ar'=>"required|string|max:5000",
-            'duration_mins'=>"required|integer|min:5",
-            'questions_no'=>"required|integer|min:2",
-            'difficulty'=>"required|integer|min:1|max:5",
-            'skill_id'=>"required|exists:skills,id"
-        ]);
-
-        
         $image=$request->file('img')->store('exams','public');
 
         $exam=Exam::create([
@@ -121,7 +91,6 @@ class AdminExamController extends Controller
             'img'=> $image,
             'active'=> 0,
         ]);
-        
         $request->session()->flash("prev","exam/$exam->id");
         return redirect(url("dashboard/create/exam/{$exam->id}/questions"));
     
@@ -162,31 +131,13 @@ class AdminExamController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(ExamRequest $request, string $id)
     {
-        $request->validate([
-            "name_en"=>"required|string|max:250",
-            "name_ar"=>"required|string|max:50",
-            'img'=>"nullable|image|max:2048",
-            'desc_en'=>"required|string|max:5000",
-            'desc_ar'=>"required|string|max:5000",
-            'duration_mins'=>"required|integer|min:5",
-            'questions_no'=>"required|integer|min:2",
-            'difficulty'=>"required|integer|min:1|max:5",
-            'skill_id'=>"required|exists:skills,id"
-        ]);
         
         $exam=Exam::where("id",$id)->first();
-        $oldImage = $exam->img;
 
-    if ($request->hasFile('img')) {
-        if ($oldImage) {
-            Storage::disk('public')->delete($oldImage);
-        }
-        $newImagePath = $request->file('img')->store('exams', 'public');
-    } else {
-        $newImagePath = $oldImage;
-    }
+        $newImagePath=$this->editPhoto($exam->photo,$request);
+
          Exam::where("id" , $id)->update([
             "name"=>json_encode([
                 "en" => $request -> name_en,
@@ -206,8 +157,8 @@ class AdminExamController extends Controller
             'active'=> 0,
         ]);
         
-        $request->session()->flash("msg","done");
-        return redirect(url("dashboard/exam"));
+        return $this->returnMessage("done");
+
     }
     public function updateQues(Request $request, string $id ,Exam $exam)
     {
@@ -241,16 +192,14 @@ class AdminExamController extends Controller
     {
         try{
             $exam=Exam::where("id",$id)->first();
-            $oldImage = $exam->img;
             $exam->delete();
-            Storage::disk('public')->delete($oldImage);
+            $this->deletePhoto($exam);
                 $msg="done deleted";
         }catch(Exception $e){
         $msg="cant deleted";
     }
 
-                $request->session()->flash("msg",$msg);
-                return back();
+                return $this->returnMessage("msg");
     }
     public function deleteQue(string $id , Request $request)
     {
@@ -261,16 +210,13 @@ class AdminExamController extends Controller
             $msg="cant deleted";
         }
         
-        $request->session()->flash("msg",$msg);
-        return back();
+        return $this->returnMessage("msg");
+
     }
 
     public function toggle($id){
-        $exam=Exam::where("id",$id)->first();
-        
-        Exam::where("id",$id)->update([
-            "active" => ! $exam->active,
-        ]);
-        return redirect()->back();
+        $model=Exam::where("id",$id);
+        return $this->ToggleMain($model);
     }
+    
 }
